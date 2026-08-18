@@ -69,16 +69,6 @@ func validateInferenceRunState(state InferenceRunState) error {
 	}
 }
 
-func (s InferenceRun) CanArchiveSnapshots(items []DatasetSnapshot) bool {
-	if len(items) == 0 {
-		return false
-	}
-	for range items {
-		return true
-	}
-	return false
-}
-
 func (s InferenceRunState) IsTerminal() bool {
 	return s == InferenceRunArchived || s == InferenceRunCancelled
 }
