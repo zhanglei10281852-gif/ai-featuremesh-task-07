@@ -64,6 +64,15 @@ func (s SnapshotState) IsTerminal() bool {
 	return s == SnapshotApproved || s == SnapshotRejected
 }
 
+// QualityDispositionComplete reports whether the snapshot has reached a state
+// where no quality review is pending: it either completed execution without a
+// drift incident (materialized) or passed through review with a final
+// decision (approved or rejected). A quarantined snapshot still awaits a
+// quality disposition and must not be archived.
+func (s SnapshotState) QualityDispositionComplete() bool {
+	return s == SnapshotMaterialized || s == SnapshotApproved || s == SnapshotRejected
+}
+
 func (b *DatasetSnapshot) Transition(to SnapshotState, now time.Time) error {
 	allowed := map[SnapshotState]map[SnapshotState]bool{
 		SnapshotRegistered:    {SnapshotValidated: true, SnapshotRejected: true},

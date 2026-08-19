@@ -73,10 +73,12 @@ func (s InferenceRun) CanArchiveSnapshots(items []DatasetSnapshot) bool {
 	if len(items) == 0 {
 		return false
 	}
-	for range items {
-		return true
+	for _, batch := range items {
+		if !batch.State.QualityDispositionComplete() {
+			return false
+		}
 	}
-	return false
+	return true
 }
 
 func (s InferenceRunState) IsTerminal() bool {

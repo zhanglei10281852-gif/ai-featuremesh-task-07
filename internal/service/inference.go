@@ -249,8 +249,15 @@ func (s *InferenceService) transitionAny(ctx context.Context, runID string, targ
 		if err != nil {
 			return err
 		}
-		if target == domain.InferenceRunArchived && !run.CanArchiveSnapshots(items) {
-			return domain.ConflictError{Resource: "dataset_snapshot", Reason: "all snapshots must be resolved before archiving"}
+		if target == domain.InferenceRunArchived {
+			if !run.CanArchiveSnapshots(items) {
+				return domain.ConflictError{Resource: "dataset_snapshot", Reason: "all snapshots must be resolved before archiving"}
+			}
+			if _, err := tx.GetActiveDriftIncident(ctx, run.ID); err == nil {
+				return domain.ConflictError{Resource: "drift_incident", Reason: "open quality drift incident must be resolved before archiving"}
+			} else if !errors.Is(err, domain.ErrNotFound) {
+				return err
+			}
 		}
 		for _, batch := range items {
 			switch target {
